@@ -3,7 +3,9 @@
 // load modules
 const express = require('express');
 const morgan = require('morgan');
-const models = require('./models')
+const users = require('./routes/users')
+const courses = require('./routes/courses')
+const { sequelize } = require('./models')
 
 // variable to enable global error logging
 const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'true';
@@ -11,16 +13,7 @@ const enableGlobalErrorLogging = process.env.ENABLE_GLOBAL_ERROR_LOGGING === 'tr
 // create the Express app
 const app = express();
 
-// Use Sequelize's authenticate function to test the database connection
-(async () => {
-  await models.sequelize.sync()
-  try{
-    await models.sequelize.authenticate()
-    console.log('Connection to database confirmed')
-  }catch(error){
-    console.log('Error connection to database', error)
-  }
-})()
+app.use(express.json())
 
 // setup morgan which gives us http request logging
 app.use(morgan('dev'));
@@ -31,6 +24,10 @@ app.get('/', (req, res) => {
     message: 'Welcome to the REST API project!',
   });
 });
+
+// Need some routes
+app.use('/api', courses)
+app.use('/api', users)
 
 // send 404 if no other route matched
 app.use((req, res) => {
@@ -54,7 +51,20 @@ app.use((err, req, res, next) => {
 // set our port
 app.set('port', process.env.PORT || 5000);
 
-// start listening on our port
-const server = app.listen(app.get('port'), () => {
-  console.log(`Express server is listening on port ${server.address().port}`);
-});
+// Test the database connection.
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+})();
+
+// Sequelize model synchronization, then start listening on our port.
+sequelize.sync()
+  .then( () => {
+    const server = app.listen(app.get('port'), () => {
+      console.log(`Express server is listening on port ${server.address().port}`);
+    });
+  });

@@ -33,11 +33,11 @@ module.exports = (sequelize) => {
         materialsNeeded: DataTypes.STRING
     },{ sequelize })
 
-    Courses.associations = (models) => {
+    Courses.associate = (models) =>{
         Courses.belongsTo(models.Users,{
             as: 'Owner',
-            foreignKey: {
-                fieldName: 'userId',
+            foreignKey:{
+                fieldName: 'userId'
             }
         })
     }
