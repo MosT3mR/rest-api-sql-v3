@@ -24,10 +24,8 @@ app.get('/', (req, res) => {
     message: 'Welcome to the REST API project!',
   });
 });
-
-// Need some routes
-app.use('/api', courses)
 app.use('/api', users)
+app.use('/api', courses)
 
 // send 404 if no other route matched
 app.use((req, res) => {
